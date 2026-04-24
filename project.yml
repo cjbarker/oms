@@ -1,0 +1,104 @@
+name: OMS
+options:
+  bundleIdPrefix: com.oms
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    ENABLE_USER_SCRIPT_SANDBOXING: "YES"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  # llama.cpp Swift Package powers the on-device Gemma (GGUF) backend.
+  # Pinned to a recent branch; replace with a version tag once published.
+  llama:
+    url: https://github.com/ggml-org/llama.cpp
+    branch: master
+
+targets:
+  OMS:
+    type: application
+    platform: iOS
+    sources:
+      - path: OMS
+    resources:
+      - path: OMS/Resources
+    info:
+      path: OMS/Info.plist
+      properties:
+        CFBundleDisplayName: OMS
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: AccentColor
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSHealthShareUsageDescription: >-
+          OMS reads your sleep, HRV, resting heart rate, active energy, and workouts
+          so your coach can tailor each day's routine to how you're actually recovering.
+        NSHealthUpdateUsageDescription: >-
+          OMS does not write to Health by default; this entry is present for future
+          workout logging.
+        NSCameraUsageDescription: >-
+          OMS uses the camera so you can photograph your gym or home equipment and
+          get exercises tailored to what you have.
+        NSPhotoLibraryUsageDescription: >-
+          OMS reads a photo you choose so your coach can identify the equipment
+          shown and adapt your routine.
+        ITSAppUsesNonExemptEncryption: false
+        UIBackgroundModes:
+          - fetch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oms.app
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: "YES"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    # To enable on-device Gemma inference, uncomment the dependency below
+    # after `xcodegen generate` and resolving the Swift Package in Xcode.
+    # dependencies:
+    #   - package: llama
+    #     product: llama
+
+  OMSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: OMSTests
+    dependencies:
+      - target: OMS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oms.app.tests
+        GENERATE_INFOPLIST_FILE: "YES"
+
+schemes:
+  OMS:
+    build:
+      targets:
+        OMS: all
+        OMSTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - OMSTests
+    archive:
+      config: Release
